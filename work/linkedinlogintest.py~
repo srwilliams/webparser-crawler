@@ -1,0 +1,17 @@
+import sys
+import requests
+from BeautifulSoup import BeautifulSoup
+
+
+payload={
+    'session-key' : 'srwilliams444@gmail.com',
+    'session-password' : 'Qwerty1234'
+}
+
+URL='https://www.linkedin.com/uas/login-submit'
+s=requests.session()
+s.post(URL,data=payload)
+
+r=s.get('http://www.linkedin.com/nhome')
+soup = BeautifulSoup(r.text)
+print soup.find('title')

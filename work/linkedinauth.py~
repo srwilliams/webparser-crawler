@@ -1,0 +1,127 @@
+#!/usr/bin/python2.7
+
+import cookielib
+import os
+import urllib
+import urllib2
+import re
+import string
+from BeautifulSoup import BeautifulSoup
+import time
+
+username = "srwilliams444@gmail.com"   #raw_input("Username for linkedin.com: ")
+password = "Qwerty1234" #raw_input("Password for linkedin.com: ")
+
+# The LinkedInParser code was taken from stackoverflow user garrowmark
+# http://stackoverflow.com/questions/18907503/logging-in-to-linkedin-with-python-requests-sessions
+
+# This code is so good. I applaud this guy.
+
+cookie_filename = "parser.cookies.txt"
+
+class LinkedInParser(object):
+
+    def __init__(self, login, password):
+        """ Start up... """
+        self.login = login
+        self.password = password
+
+        # Simulate browser with cookies enabled
+        self.cj = cookielib.MozillaCookieJar(cookie_filename)
+        if os.access(cookie_filename, os.F_OK):
+            self.cj.load()
+        self.opener = urllib2.build_opener(
+            urllib2.HTTPRedirectHandler(),
+            urllib2.HTTPHandler(debuglevel=0),
+            urllib2.HTTPSHandler(debuglevel=0),
+            urllib2.HTTPCookieProcessor(self.cj)
+        )
+        self.opener.addheaders = [
+            ('User-agent', ('Mozilla/4.0 (compatible; MSIE 6.0; '
+                           'Windows NT 5.2; .NET CLR 1.1.4322)'))
+        ]
+
+        # Login
+        self.loginPage()
+
+        title = self.loadTitle()
+        print title
+        self.cj.save()
+		
+		# My (Shelby's) code ##################################
+		
+		# load, check, and read the database file
+        try:
+            dbase = file('database1.txt')
+        except IOError:
+            print 'Unable to open file', dbase
+
+        lnum = 0
+        line = dbase.readline()
+
+        # This loop parses the file, reads in the web page, retrieves the info,
+        # and then writes the info to the file
+        while line:
+
+            lnum += 1
+            line = line.rstrip('\n')
+            lntok = line.split()
+            link = lntok[2]
+            print link
+
+            #site = self.loadPage("https://www.linkedin.com/vsearch/p?&f_G=us%3A0&f_CC=37914")
+            #print site
+            #soup = BeautifulSoup(site)
+
+            #rescount = soup.find("div", {"class" : "mod results_count"})
+            #print("\n"+rescount.p.strong.string+"\n")
+            #print(soup.get_text())
+            time.sleep(5)
+            line = dbase.readline()
+############ End of my code ####################################################
+
+       
+
+
+    def loadPage(self, url, data=None):
+        """
+        Utility function to load HTML from URLs for us with hack to continue despite 404
+        """
+        # We'll print the url in case of infinite loop
+        # print "Loading URL: %s" % url
+        try:
+            if data is not None:
+                response = self.opener.open(url, data)
+            else:
+                response = self.opener.open(url)
+            return ''.join(response.readlines())
+        except:
+            # If URL doesn't load for ANY reason, try again...
+            # Quick and dirty solution for 404 returns because of network problems
+            # However, this could infinite loop if there's an actual problem
+            return self.loadPage(url, data)
+
+    def loginPage(self):
+        """
+        Handle login. This should populate our cookie jar.
+        """
+        html = self.loadPage("https://www.linkedin.com/")
+        soup = BeautifulSoup(html)
+        csrf = soup.find(id="csrfToken-postModuleForm")['value']
+
+        login_data = urllib.urlencode({
+            'session_key': self.login,
+            'session_password': self.password,
+            'loginCsrfParam': csrf,
+        })
+
+        html = self.loadPage("https://www.linkedin.com/uas/login-submit", login_data)
+        return
+
+    def loadTitle(self):
+        html = self.loadPage("https://www.linkedin.com/vsearch/p?&f_G=us%3A0&f_CC=37914")
+        soup = BeautifulSoup(html)
+        return soup.get_text()
+
+parser = LinkedInParser(username, password)
+dbase.close()
