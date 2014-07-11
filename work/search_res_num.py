@@ -1,6 +1,6 @@
 #!/usr/bin/python2.7
 
-import time
+import time, os
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -58,10 +58,17 @@ while 1:
     source_code = elem.get_attribute("outerHTML")
     soup = BeautifulSoup(source_code)
     rescount = soup.find("div", {"class" : "mod results_count"})
-    count = rescount.p.strong.string
+
+# If I encounter a sign in timeout:
+    if rescount is not None:
+        count = rescount.p.strong.string
+    else:
+        time.sleep(60) # Give me time to enter in user/password and reCaptcha
+        continue # rerun the line
     print("\n"+count+"\n")
     file.write(lntok[0] + "\t" + lntok[1] + "\t" + count + "\n")
     lnum += 1
+    print lnum
     time.sleep(2.5)
     
 
