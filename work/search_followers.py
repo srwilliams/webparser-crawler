@@ -12,7 +12,7 @@ from selenium.webdriver.common.by import By
 
 random.seed()
 
-number = random.randint(1, 15)
+number = random.randint(1, 7)
 
 driver = webdriver.Firefox()
 
@@ -26,7 +26,7 @@ curdate = curdate.isoformat()
 
 file = open( curdate, 'a')
 
-lnum = 0
+lnum = 435
 line = dbase.readline()
 
 driver.get("http://www.linkedin.com")
@@ -55,8 +55,8 @@ while 1:
         count = followercount.a.strong.string
         count = count.replace(',','')
     else:
-        time.sleep(60)
-        continue
+        time.sleep(10)
+        count = "Company not active"
     lnum +=1
     print(str(lnum) + "\t" + link + "\t" + count)
     file.write(lntok[0] + "\t" + lntok[1] + "\t" + count + "\n")
